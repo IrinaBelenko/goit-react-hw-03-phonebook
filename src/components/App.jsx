@@ -3,17 +3,29 @@ import { ContactForm } from './ContactForm/ContactForm';
 import { ContactList } from './ContactList/ContactList';
 import { nanoid } from 'nanoid';
 import { Filter } from './Filter/Filter';
+const KEY = 'contacts';
 
 export class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      contacts: [],
-      filter: '',
-      currentContacts: [],
-    };
+  state = {
+    contacts: [],
+    filter: '',
+  };
 
-    this.state.currentContacts = this.state.contacts;
+  componentDidMount() {
+    const contacts = JSON.parse(localStorage.getItem(KEY));
+    if (contacts) {
+      this.setState({ contacts });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.state.filter !== '') {
+      return;
+    }
+
+    if (prevState.contacts !== this.state.contacts) {
+      localStorage.setItem(KEY, JSON.stringify(this.state.contacts));
+    }
   }
 
   addContact = ({ name, number }) => {
@@ -23,6 +35,11 @@ export class App extends Component {
 
     if (checkName) {
       alert(`${name} is already in contacts.`);
+      return;
+    }
+
+    if (this.state.filter !== '') {
+      alert('filter needs to be cleaned');
       return;
     }
 
@@ -36,28 +53,34 @@ export class App extends Component {
       const newContacts = [...prev.contacts, contact];
       return {
         contacts: newContacts,
-        currentContacts: newContacts,
       };
     });
   };
 
-  filterContact = search => {
-    if (search === '') {
-      this.setState({ currentContacts: this.state.contacts });
+  filterContact = filter => {
+    const contacts = JSON.parse(localStorage.getItem(KEY));
+
+    if (filter === '') {
+      this.setState({ contacts: contacts });
       return;
     }
 
     this.setState({
-      currentContacts: this.state.contacts.filter(contact =>
-        contact.name.toLowerCase().includes(search)
+      contacts: contacts.filter(contact =>
+        contact.name.toLowerCase().includes(filter)
       ),
+      filter,
     });
   };
 
   deleteContact = id => {
+    if (this.state.filter !== '') {
+      alert('filter needs to be cleaned');
+      return;
+    }
     this.setState(prev => {
       const newContacts = prev.contacts.filter(contact => contact.id !== id);
-      return { contacts: newContacts, currentContacts: newContacts };
+      return { contacts: newContacts };
     });
   };
 
@@ -69,7 +92,7 @@ export class App extends Component {
         <h2>Contacts</h2>
         <Filter filterContact={this.filterContact}> </Filter>
         <ContactList
-          contacts={this.state.currentContacts}
+          contacts={this.state.contacts}
           deleteContact={this.deleteContact}
         ></ContactList>
       </div>
