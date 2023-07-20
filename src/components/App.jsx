@@ -18,7 +18,7 @@ export class App extends Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(_, prevState) {
     if (this.state.filter !== '') {
       return;
     }
