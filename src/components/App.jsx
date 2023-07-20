@@ -57,6 +57,13 @@ export class App extends Component {
     });
   };
 
+  onFilter = ({ target }) => {
+    this.setState({
+      filter: target.value,
+    });
+    this.filterContact(target.value.toLowerCase());
+  };
+
   filterContact = filter => {
     const contacts = JSON.parse(localStorage.getItem(KEY));
 
@@ -90,7 +97,7 @@ export class App extends Component {
         <h1>Phonebook</h1>
         <ContactForm addContact={this.addContact}> </ContactForm>
         <h2>Contacts</h2>
-        <Filter filterContact={this.filterContact}> </Filter>
+        <Filter filter={this.state.filter} onFilter={this.onFilter}></Filter>
         <ContactList
           contacts={this.state.contacts}
           deleteContact={this.deleteContact}
